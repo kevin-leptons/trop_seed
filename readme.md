@@ -25,8 +25,10 @@ let conf = seed.load(schema, 'conf_file.yaml')
 
 ## APIs
 
-### seed.load(schema, file)
+### function seed.load(schema, file)
 
+* Description
+    * Load and verify configuration file
 * Input
     * `schema` / `Object` - JSON Schema which describes configurations
     * `file`/ `String` - Path to configuration file, written by YAML syntax
@@ -39,9 +41,14 @@ let conf = seed.load(schema, 'conf_file.yaml')
     * `seed.InvalidConfigFile` - Configuration is invalid
     * and other errors
 
+### class seed.InvalidConfigFile
+
+* Description
+    * Throw on configuration file is invalid than schema
+
 ## Todo
 
-* `seed.load()` does not set default value for attributes because it is quite
+* `seed.load()` does not set default values for attributes because it is quite
   complex. If any one has resources then let's research and make a pull
   request, I am glad to merge it.
 
