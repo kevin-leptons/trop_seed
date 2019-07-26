@@ -9,21 +9,41 @@ describe('seed.load()', () => {
         additionalProperties: false,
         required: [
             'name',
-            'age',
-            'address'
+            'gender',
+            'age'
         ],
         properties: {
             name: {
                 type: 'string'
+            },
+            gender: {
+                type: 'string',
+                enum: [
+                    'male',
+                    'female'
+                ]
             },
             age: {
                 type: 'integer',
                 minimum: 0
             },
             address: {
-                type: 'string'
+                type: 'object',
+                properties: {
+                    city: {
+                        type: 'string'
+                    },
+                    country: {
+                        type: 'string'
+                    }
+                }
             }
         }
+    }
+    let defaultValues = {
+        'age': 18,
+        'address.city': 'Ha Noi',
+        'address.country': 'Vietnam'
     }
 
     it('with not existed file', () => {
@@ -43,7 +63,8 @@ describe('seed.load()', () => {
 
         assert.equal(conf.name, 'kevin')
         assert.equal(conf.age, 18)
-        assert.equal(conf.address, 'Vietnam')
+        assert.equal(conf.address.country, 'Vietnam')
+        assert.equal(conf.address.city, 'Ha Noi')
     })
 
     it('with empty configuration file', () => {
@@ -77,6 +98,26 @@ describe('seed.load()', () => {
             name: 'InvalidConfigFile',
             message: file
         })
+    })
+
+    it('with default values', () => {
+        let file = _conf_file_path('option_attribute.yaml')
+        let conf = seed.load(schema, file, defaultValues)
+
+        assert.equal(conf.name, 'kevin')
+        assert.equal(conf.age, 18)
+        assert.equal(conf.address.country, 'Vietnam')
+        assert.equal(conf.address.city, 'Ha Noi')
+    })
+
+    it('with half of default values', () => {
+        let file = _conf_file_path('half_option_attribute.yaml')
+        let conf = seed.load(schema, file, defaultValues)
+
+        assert.equal(conf.name, 'kevin')
+        assert.equal(conf.age, 18)
+        assert.equal(conf.address.country, 'Vietnam')
+        assert.equal(conf.address.city, 'Ho Chi Minh')
     })
 })
 
