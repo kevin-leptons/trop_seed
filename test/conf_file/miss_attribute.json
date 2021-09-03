@@ -1,0 +1,8 @@
+{
+    "name": "kevin",
+    "age": 18,
+    "address": {
+        "country": "Vietnam",
+        "city": "Ha Noi"
+    }
+}

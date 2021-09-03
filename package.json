@@ -1,6 +1,6 @@
 {
   "name": "@trop/seed",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "Define and load configuration file",
   "main": "lib/index.js",
   "scripts": {
@@ -12,12 +12,13 @@
   },
   "keywords": [
     "define",
+    "schema",
     "load",
     "config",
     "file"
   ],
   "author": "Kevin Leptons",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kevin-leptons/trop_seed/issues"
   },
@@ -27,7 +28,6 @@
   },
   "dependencies": {
     "ajv": "^6.10.2",
-    "js-yaml": "^3.13.1",
     "lodash": "^4.17.15"
   }
 }
