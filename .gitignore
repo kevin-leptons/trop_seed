@@ -3,5 +3,6 @@
 /node_modules/
 /tmp/
 package-lock.json
+*.tgz
 *.swp
 *.swo

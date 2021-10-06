@@ -1,0 +1,12 @@
+// this comment is not standard JSON but will not throw error
+// below configuration is parse as normal
+
+{
+    "name": "kevin",
+    "age": 18,
+    "gender": "male",
+    "address": {
+        "country": "Vietnam",
+        "city": "Ha Noi"
+    }
+}

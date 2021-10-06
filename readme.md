@@ -1,6 +1,6 @@
 # @trop/seed
 
-* Define, load and validate JSON configuration file. 
+* Define, load and validate JSON configuration file.
 * Major version with even number is use for development, for example `0.3.0`,
   `2.1.0`.
 * Major version with odd number is use for production, for example `1.0.0`,
@@ -30,6 +30,8 @@ function load(schema, file, default_values={}) {}
 ```
 
 # Example
+
+**read_config.js**
 
 ```js
 const seed = require('@trop/seed')
@@ -64,7 +66,24 @@ let default_values = {
     'address.country': 'Vietnam',
     'address.city': 'Ha Noi'
 }
-let config = seed.load(schema, 'conf_file.yaml', default_values)
+let config = seed.load(schema, 'config_file.json', default_values)
+```
+
+**config_file.json**
+
+```jsonc
+// this comment is not standard JSON but will not throw error
+// below configuration is parse as normal
+
+{
+    "name": "kevin",
+    "age": 18,
+    "gender": "male",
+    "address": {
+        "country": "Vietnam",
+        "city": "Ha Noi"
+    }
+}
 ```
 
 # References

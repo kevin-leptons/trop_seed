@@ -52,7 +52,7 @@ describe('seed.load()', () => {
         assert.throws(
             () => {
                 seed.load(schema, file)
-            }, 
+            },
             {
                 name: 'Error',
                 code: 'ENOENT'
@@ -68,8 +68,8 @@ describe('seed.load()', () => {
                 seed.load(schema, file)
             },
             {
-                name: 'SyntaxError',
-                message: 'Unexpected token a in JSON at position 1'
+                name: 'Error',
+                message: 'Invalid JSON format'
             }
         )
     })
@@ -78,10 +78,10 @@ describe('seed.load()', () => {
         let file = _conf_file_path('empty_with_requirement.json')
 
         assert.throws(
-            () => 
+            () =>
             {
                 seed.load(schema, file)
-            }, 
+            },
             {
                 name: 'ConfigFileError',
                 message: file
@@ -95,7 +95,7 @@ describe('seed.load()', () => {
         assert.throws(
             () => {
                 seed.load(schema, file)
-            }, 
+            },
             {
                 name: 'ConfigFileError',
                 message: file
@@ -109,7 +109,7 @@ describe('seed.load()', () => {
         assert.throws(
             () => {
                 seed.load(schema, file)
-            }, 
+            },
             {
                 name: 'ConfigFileError',
                 message: file
@@ -142,7 +142,7 @@ describe('seed.load()', () => {
             name: 'mr. noob',
             age: 40
         }
-    
+
         assert.deepStrictEqual(actual_result, expected_result)
     })
 
@@ -180,6 +180,22 @@ describe('seed.load()', () => {
 
     it('valid configuration file', () => {
         let file = _conf_file_path('valid.json')
+        let actual_result = seed.load(schema, file)
+        let expected_result = {
+            name: 'kevin',
+            age: 18,
+            gender: 'male',
+            address: {
+                country: 'Vietnam',
+                city: 'Ha Noi'
+            }
+        }
+
+        assert.deepStrictEqual(actual_result, expected_result)
+    })
+
+    it('configuration file with comments', () => {
+        let file = _conf_file_path('valid_comment.json')
         let actual_result = seed.load(schema, file)
         let expected_result = {
             name: 'kevin',

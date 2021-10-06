@@ -1,6 +1,10 @@
 # Changelog
 
-## v0.3.0
+## 2.1.0
+
+* Add: Support comments in JSON configuration file.
+
+## 2.0.0
 
 * Fix: `seed.load()` throws error on empty file and schema does not require
   any properties.

@@ -1,6 +1,6 @@
 {
   "name": "@trop/seed",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Define and load configuration file",
   "main": "lib/index.js",
   "scripts": {
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "ajv": "^6.10.2",
+    "comment-json": "^4.1.1",
     "lodash": "^4.17.15"
   }
 }
