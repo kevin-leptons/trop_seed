@@ -1,27 +1,209 @@
-const path = require('path')
+/*eslint-disable max-len*/
+
+'use strict'
+
 const assert = require('assert')
-
 const seed = require('../lib')
+const {getDataFile} = require('./_lib')
 
-describe('seed.load()', () => {
-    let schema = {
+describe('seed.load: input', () => {
+    it('invalid filePath, throws error', () => {
+        let filePath = {}
+
+        assert.throws(
+            () => seed.load(filePath),
+            {
+                name: 'LoadingError',
+                message: 'invalid file path',
+                labels: {}
+            }
+        )
+    })
+
+    it('schema is not an object, throws error', () => {
+        let filePath = 'no_need_file_path_yet'
+        let schema = '{}'
+
+        assert.throws(
+            () => seed.load(filePath, {schema}),
+            {
+                name: 'LoadingError',
+                message: 'invalid option: schema',
+                labels: {}
+            }
+        )
+    })
+
+    it('schema refers to not existed definition, throws error', () => {
+        let filePath = getDataFile('valid.json')
+        let schema = {
+            type: 'object',
+            properties: {
+                name: {
+                    $ref: '//not/existed/reference'
+                }
+            }
+        }
+
+        assert.throws(
+            () => seed.load(filePath, {schema}),
+            {
+                name: 'LoadingError',
+                message: 'bad schema specification',
+                labels: {
+                    schema: '//not/existed/reference',
+                    reference: '//not/existed/reference',
+                    message: 'can\'t resolve reference //not/existed/reference from id #'
+                }
+            }
+        )
+    })
+
+    it('invalid filePermission, throws error', () => {
+        let filePath = 'no_need_file_path_yet'
+        let options = {
+            filePermission: 0o10000
+        }
+
+        assert.throws(
+            () => seed.load(filePath, options),
+            {
+                name: 'LoadingError',
+                message: 'invalid option: filePermission',
+                labels: {}
+            }
+        )
+    })
+
+    it('invalid defaultValues, throws error', () => {
+        let filePath = 'no_need_file_path_yet'
+        let options = {
+            defaultValues: '{}'
+        }
+
+        assert.throws(
+            () => seed.load(filePath, options),
+            {
+                name: 'LoadingError',
+                message: 'invalid option: defaultValues',
+                labels: {}
+            }
+        )
+    })
+
+    it('has unknown option, throws error', () => {
+        let filePath = 'no_need_file_path_yet'
+        let options = {
+            foo: 'one'
+        }
+
+        assert.throws(
+            () => seed.load(filePath, options),
+            {
+                name: 'LoadingError',
+                message: 'unknown option: foo',
+                labels: {}
+            }
+        )
+    })
+})
+
+describe('seed.load: file', () => {
+    it('not existed, throws error', () => {
+        let filePath = getDataFile('not_existed_file.json')
+
+        assert.throws(
+            () => {
+                seed.load(filePath)
+            },
+            {
+                name: 'LoadingError',
+                message: 'file is not existed or access denied',
+                labels: {}
+            }
+        )
+    })
+
+    it('invalid JSON format, throws error', () => {
+        let filePath = getDataFile('invalid_json_format.json')
+
+        assert.throws(
+            () => seed.load(filePath),
+            {
+                name: 'LoadingError',
+                message: 'invalid JSON format',
+                labels: {
+                    line: 1,
+                    column: 0
+                }
+            }
+        )
+    })
+
+    it('empty, throws error', () => {
+        let filePath = getDataFile('empty.json')
+
+        assert.throws(
+            () => seed.load(filePath),
+            {
+                name: 'LoadingError',
+                message: 'invalid JSON format'
+            }
+        )
+    })
+
+    it('has comments, should be fine', () => {
+        let filePath = getDataFile('has_comment.json')
+        let expectedResult = {
+            name: 'name.foo',
+            age: 18
+        }
+        let actualResult = seed.load(filePath)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+
+    it('not a regular file, throws error', () => {
+        let filePath = getDataFile('')
+
+        assert.throws(
+            () => seed.load(filePath),
+            {
+                name: 'LoadingError',
+                message: 'not a regular file',
+                labels: {}
+            }
+        )
+    })
+
+    it('invalid file permission, throws error', () => {
+        let filePath = getDataFile('permission_701.json')
+        let option = {
+            filePermission: 0o700
+        }
+
+        assert.throws(
+            () => seed.load(filePath, option),
+            {
+                name: 'LoadingError',
+                message: 'file permission is too open',
+                labels: {
+                    upperBoundary: '0o700',
+                    actual: '0o701'
+                }
+            }
+        )
+    })
+})
+
+describe('seed.load: configuration', () => {
+    const SAMPLE_SCHEMA = {
         type: 'object',
         additionalProperties: false,
-        required: [
-            'name',
-            'gender',
-            'age'
-        ],
+        required: ['name', 'age'],
         properties: {
             name: {
                 type: 'string'
-            },
-            gender: {
-                type: 'string',
-                enum: [
-                    'male',
-                    'female'
-                ]
             },
             age: {
                 type: 'integer',
@@ -40,177 +222,78 @@ describe('seed.load()', () => {
             }
         }
     }
-    let default_values = {
-        'age': 18,
-        'address.city': 'Ha Noi',
-        'address.country': 'Vietnam'
-    }
 
-    it('not existed file throws error', () => {
-        let file = _conf_file_path('not_existed_file.json')
+    it('invalid attribute types, throws error', () => {
+        let filePath = getDataFile('invalid_type.json')
 
         assert.throws(
             () => {
-                seed.load(schema, file)
+                seed.load(filePath, {schema: SAMPLE_SCHEMA})
             },
             {
-                name: 'Error',
-                code: 'ENOENT'
-            }
-        )
-    })
-
-    it('invalid JSON format file throws error', () => {
-        let file = _conf_file_path('invalid_json_file.txt')
-
-        assert.throws(
-            () => {
-                seed.load(schema, file)
-            },
-            {
-                name: 'Error',
-                message: 'Invalid JSON format'
-            }
-        )
-    })
-
-    it('empty file, schema requires properties throws error', () => {
-        let file = _conf_file_path('empty_with_requirement.json')
-
-        assert.throws(
-            () =>
-            {
-                seed.load(schema, file)
-            },
-            {
-                name: 'ConfigFileError',
-                message: file
-            }
-        )
-    })
-
-    it('missing attributes throws error', () => {
-        let file = _conf_file_path('miss_attribute.json')
-
-        assert.throws(
-            () => {
-                seed.load(schema, file)
-            },
-            {
-                name: 'ConfigFileError',
-                message: file
-            }
-        )
-    })
-
-    it('invalid attribute type throws error', () => {
-        let file = _conf_file_path('invalid_type.json')
-
-        assert.throws(
-            () => {
-                seed.load(schema, file)
-            },
-            {
-                name: 'ConfigFileError',
-                message: file
-            }
-        )
-    })
-
-
-    it('empty file, schema does not require any properties', () => {
-        let schema = {
-            type: 'object',
-            additionalProperties: false,
-            required: [],
-            properties: {
-                name: {
-                    type: 'string'
-                },
-                age: {
-                    type: 'string'
+                name: 'LoadingError',
+                message: 'bad configuration',
+                labels: {
+                    dataPath: '.age',
+                    schemaPath: '#/properties/age/type',
+                    message: 'should be integer'
                 }
             }
-        }
-        let default_values = {
-            name: 'mr. noob',
-            age: 40
-        }
-        let file = _conf_file_path('empty_with_no_requirement.json')
-        let actual_result = seed.load(schema, file, default_values)
-        let expected_result = {
-            name: 'mr. noob',
-            age: 40
-        }
-
-        assert.deepStrictEqual(actual_result, expected_result)
+        )
     })
 
-    it('default values', () => {
-        let file = _conf_file_path('option_attribute.json')
-        let actual_result = seed.load(schema, file, default_values)
-        let expected_result = {
-            name: 'kevin',
-            age: 18,
-            gender: 'male',
-            address: {
-                country: 'Vietnam',
-                city: 'Ha Noi'
-            }
-        }
+    it('missing required attributes, throws error', () => {
+        let filePath = getDataFile('missing_attribute.json')
 
-        assert.deepStrictEqual(actual_result, expected_result)
+        assert.throws(
+            () => seed.load(filePath, {schema: SAMPLE_SCHEMA}),
+            {
+                name: 'LoadingError',
+                message: 'bad configuration',
+                labels: {
+                    dataPath: '',
+                    schemaPath: '#/required',
+                    message: 'should have required property \'age\''
+                }
+            }
+        )
     })
 
-    it('half of default values', () => {
-        let file = _conf_file_path('half_option_attribute.json')
-        let actual_result = seed.load(schema, file, default_values)
-        let expected_result = {
-            name: 'kevin',
+    it('missing not required attributes, return default values', () => {
+        let filePath = getDataFile('optional_attribute.json')
+        const defaultValues = {
+            'address.country': 'country.foo',
+            'address.city': 'city.bar'
+        }
+        let expectedResult = {
+            name: 'foo',
             age: 18,
-            gender: 'male',
             address: {
-                country: 'Vietnam',
-                city: 'Ho Chi Minh'
+                country: 'country.foo',
+                city: 'city.bar'
             }
         }
+        let options = {
+            schema: SAMPLE_SCHEMA,
+            defaultValues: defaultValues
+        }
+        let actualResult = seed.load(filePath, options)
 
-        assert.deepStrictEqual(actual_result, expected_result)
+        assert.deepStrictEqual(actualResult, expectedResult)
     })
 
-    it('valid configuration file', () => {
-        let file = _conf_file_path('valid.json')
-        let actual_result = seed.load(schema, file)
-        let expected_result = {
-            name: 'kevin',
+    it('return valid configuration', () => {
+        let filePath = getDataFile('valid.json')
+        let expectedResult = {
+            name: 'name.foo',
             age: 18,
-            gender: 'male',
             address: {
-                country: 'Vietnam',
-                city: 'Ha Noi'
+                country: 'country.foo',
+                city: 'city.bar'
             }
         }
+        let actualResult = seed.load(filePath, {schema: SAMPLE_SCHEMA})
 
-        assert.deepStrictEqual(actual_result, expected_result)
-    })
-
-    it('configuration file with comments', () => {
-        let file = _conf_file_path('valid_comment.json')
-        let actual_result = seed.load(schema, file)
-        let expected_result = {
-            name: 'kevin',
-            age: 18,
-            gender: 'male',
-            address: {
-                country: 'Vietnam',
-                city: 'Ha Noi'
-            }
-        }
-
-        assert.deepStrictEqual(actual_result, expected_result)
+        assert.deepStrictEqual(actualResult, expectedResult)
     })
 })
-
-function _conf_file_path(relative_path) {
-    return path.join(__dirname, 'conf_file', relative_path)
-}

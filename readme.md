@@ -15,18 +15,27 @@ npm install @trop/seed
 # APIs
 
 ```js
-const {load, ConfigFileError} = require('@trop/seed')
+const {load, LoadingError} = require('@trop/seed')
 
 /**
- * Load and verify configuration file.
- * @param {object} schema JSON schema that describes configuration file.
- * @param {string} file Path to JSON configuration file.
- * @param {object} default_values Key-value pairs for default values. The key
- *        follows specification of argument "path" from "lodash.set()".
- * @returns {object} Configurations from file.
- * @throws {ConfigFileError}
+ * Load and validate configuration file.
+ *
+ * @param {string} filePath - Path to JSON configuration file.
+ * @param {Options} [options={}]
+ * @returns {any} Valid configurations from file.
+ * @throws {LoadingError}
  */
 function load(schema, file, default_values={}) {}
+
+/**
+ * @typedef {object} Options
+ * @property {object} [schema={}] - JSON schema that specifies configuration.
+ * @property {KeyValue} [defaultValues={}] - Key-value pairs for default
+ * of configuration values. The key follows specification of argument "path"
+ * from "lodash.set()".
+ * @property {uint} [filePermission=0o600] - File must be in mode less than or
+ * equal.
+ */
 ```
 
 # Example
@@ -39,10 +48,7 @@ const seed = require('@trop/seed')
 let schema = {
     type: 'object',
     additionalProperties: false,
-    required: [
-        'name',
-        'age'
-    ],
+    required: ['name', 'age'],
     properties: {
         name: {
             type: 'string'
@@ -61,27 +67,41 @@ let schema = {
         }
     }
 }
-let default_values = {
+let defaultValues = {
     'age': 18,
-    'address.country': 'Vietnam',
-    'address.city': 'Ha Noi'
+    'address.country': 'country.foo',
+    'address.city': 'country.bar'
 }
-let config = seed.load(schema, 'config_file.json', default_values)
+
+try {
+    let config = seed.load('config_file.json', {
+        schema: schema,
+        defaultValues: defaultValues,
+        filePermission: 0o700
+    })
+}
+catch (error) {
+    if (error instanceof seed.LoadingError) {
+        console.log(error.summary())
+        return
+    }
+
+    throw error
+}
 ```
 
 **config_file.json**
 
 ```jsonc
-// this comment is not standard JSON but will not throw error
-// below configuration is parse as normal
+// This comment is not standard JSON but does not cause errors.
+// Below configuration is parse as normal.
 
 {
-    "name": "kevin",
+    "name": "foo",
     "age": 18,
-    "gender": "male",
     "address": {
-        "country": "Vietnam",
-        "city": "Ha Noi"
+        "country": "country.foo",
+        "city": "city.bar"
     }
 }
 ```

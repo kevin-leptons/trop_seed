@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0
+
+* Remove: `ConfigFileError`, use `LoadingError` instead.
+* Change: Arguments from `load()`.
+* Add: `load()` support to specify file permission requirements.
+* Add: `LoadingError` for better error handling from `load()`.
+
 ## 2.1.0
 
 * Add: Support comments in JSON configuration file.

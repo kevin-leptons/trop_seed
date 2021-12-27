@@ -1,10 +1,11 @@
 {
   "name": "@trop/seed",
-  "version": "2.1.0",
-  "description": "Define and load configuration file",
+  "version": "2.2.0",
+  "description": "Define, load and validate configuration files",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha",
+    "standardize": "trop_standard lib test"
   },
   "repository": {
     "type": "git",
@@ -12,10 +13,12 @@
   },
   "keywords": [
     "define",
-    "schema",
     "load",
-    "config",
-    "file"
+    "validate",
+    "configuration",
+    "file",
+    "json",
+    "schema"
   ],
   "author": "Kevin Leptons",
   "license": "MIT",
@@ -24,6 +27,7 @@
   },
   "homepage": "https://github.com/kevin-leptons/trop_seed#readme",
   "devDependencies": {
+    "@trop/standard": "^0.8.0",
     "mocha": "^6.2.0"
   },
   "dependencies": {

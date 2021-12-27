@@ -1,0 +1,8 @@
+{
+    "name": "name.foo",
+    "age": 18,
+    "address": {
+        "country": "country.foo",
+        "city": "city.bar"
+    }
+}
