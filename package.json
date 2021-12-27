@@ -1,6 +1,6 @@
 {
   "name": "@trop/seed",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Define, load and validate configuration files",
   "main": "lib/index.js",
   "scripts": {

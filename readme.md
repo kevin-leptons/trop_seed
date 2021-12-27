@@ -33,8 +33,8 @@ function load(schema, file, default_values={}) {}
  * @property {KeyValue} [defaultValues={}] - Key-value pairs for default
  * of configuration values. The key follows specification of argument "path"
  * from "lodash.set()".
- * @property {uint} [filePermission=0o600] - File must be in mode less than or
- * equal.
+ * @param {uint} [filePermission=0o600] - If file permission is greater than
+ * this one then throws error.
  */
 ```
 
