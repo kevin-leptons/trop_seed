@@ -34,6 +34,24 @@ describe('seed.load: input', () => {
         )
     })
 
+    it('schema has unknown keyword, throws error', () => {
+        let filePath = getDataFile('valid.json')
+        let schema = {
+            unknownKeyword: 'one'
+        }
+
+        assert.throws(
+            () => seed.load(filePath, {schema}),
+            {
+                name: 'LoadingError',
+                message: 'bad schema',
+                labels: {
+                    message: 'strict mode: unknown keyword: "unknownKeyword"'
+                }
+            }
+        )
+    })
+
     it('schema refers to not existed definition, throws error', () => {
         let filePath = getDataFile('valid.json')
         let schema = {
@@ -49,7 +67,7 @@ describe('seed.load: input', () => {
             () => seed.load(filePath, {schema}),
             {
                 name: 'LoadingError',
-                message: 'bad schema specification',
+                message: 'bad schema',
                 labels: {
                     schema: '//not/existed/reference',
                     reference: '//not/existed/reference',
@@ -232,11 +250,15 @@ describe('seed.load: configuration', () => {
             },
             {
                 name: 'LoadingError',
-                message: 'bad configuration',
+                message: 'bad attribute',
                 labels: {
-                    dataPath: '.age',
+                    instancePath: '/age',
+                    keyword: 'type',
+                    params: {
+                        type: 'integer'
+                    },
                     schemaPath: '#/properties/age/type',
-                    message: 'should be integer'
+                    message: 'must be integer'
                 }
             }
         )
@@ -249,11 +271,15 @@ describe('seed.load: configuration', () => {
             () => seed.load(filePath, {schema: SAMPLE_SCHEMA}),
             {
                 name: 'LoadingError',
-                message: 'bad configuration',
+                message: 'bad attribute',
                 labels: {
-                    dataPath: '',
+                    instancePath: '',
+                    keyword: 'required',
                     schemaPath: '#/required',
-                    message: 'should have required property \'age\''
+                    params: {
+                        missingProperty: 'age'
+                    },
+                    message: 'must have required property \'age\''
                 }
             }
         )

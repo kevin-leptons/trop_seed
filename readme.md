@@ -1,10 +1,8 @@
 # @trop/seed
 
 * Define, load and validate JSON configuration file.
-* Major version with even number is use for development, for example `0.3.0`,
-  `2.1.0`.
-* Major version with odd number is use for production, for example `1.0.0`,
-  `3.0.1`.
+* Development version has even number, for example `0.3.0`, `2.1.0`.
+* Production version has odd major version, for example `1.0.0`, `3.0.1`.
 
 # Install
 
@@ -21,8 +19,8 @@ const {load, LoadingError} = require('@trop/seed')
  * Load and validate configuration file.
  *
  * @param {string} filePath - Path to JSON configuration file.
- * @param {Options} [options={}]
- * @returns {any} Valid configurations from file.
+ * @param {Options} [options={}] - Options for loading.
+ * @returns {any} Valid configuration from file.
  * @throws {LoadingError}
  */
 function load(schema, file, default_values={}) {}
@@ -30,11 +28,24 @@ function load(schema, file, default_values={}) {}
 /**
  * @typedef {object} Options
  * @property {object} [schema={}] - JSON schema that specifies configuration.
- * @property {KeyValue} [defaultValues={}] - Key-value pairs for default
- * of configuration values. The key follows specification of argument "path"
- * from "lodash.set()".
- * @param {uint} [filePermission=0o600] - If file permission is greater than
- * this one then throws error.
+ * @property {object} [defaultValues={}] - Key-value pairs for default values,
+ * it is the same as argument `path` from `lodash.set()`.
+ * @param {FilePermission} [filePermission=0o0600] - If file permission is
+ * greater than this one then throws error. Works on Linux and MacOS, ignored
+ * on on other platforms
+ */
+
+/**
+ * @typdef {number} FilePermission
+ *
+ * Unsigned integer, less than or equal 0o7777.
+ */
+
+/**
+ * @typedef {Error} LoadingError
+ * @property {string} message - Short description.
+ * @property {any} filePath - Path to configuration file.
+ * @property {object} labels - Additional information.
  */
 ```
 
@@ -58,11 +69,14 @@ let schema = {
             minimum: 0
         },
         address: {
-            country: {
-                type: 'string'
-            },
-            city: {
-                type: 'string'
+            type: 'object',
+            properties: {
+                country: {
+                    type: 'string'
+                },
+                city: {
+                    type: 'string'
+                }
             }
         }
     }
@@ -72,22 +86,13 @@ let defaultValues = {
     'address.country': 'country.foo',
     'address.city': 'country.bar'
 }
+let config = seed.load('config_file.json', {
+    schema: schema,
+    defaultValues: defaultValues,
+    filePermission: 0o700
+})
 
-try {
-    let config = seed.load('config_file.json', {
-        schema: schema,
-        defaultValues: defaultValues,
-        filePermission: 0o700
-    })
-}
-catch (error) {
-    if (error instanceof seed.LoadingError) {
-        console.log(error.summary())
-        return
-    }
-
-    throw error
-}
+console.log(config)
 ```
 
 **config_file.json**

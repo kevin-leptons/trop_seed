@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0
+
+* Change: `ConfigFileError` attributes.
+* Change: Upgrade ajv to version 8.8.2.
+* Add: Validate argument `filePath` from `load()`.
+
 ## 2.2.0
 
 * Remove: `ConfigFileError`, use `LoadingError` instead.
