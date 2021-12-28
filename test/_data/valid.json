@@ -4,5 +4,6 @@
     "address": {
         "country": "country.foo",
         "city": "city.bar"
-    }
+    },
+    "friends": ["foo", "bar"]
 }

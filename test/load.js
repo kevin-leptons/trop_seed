@@ -281,6 +281,12 @@ describe('seed.load: configuration', () => {
                         type: 'string'
                     }
                 }
+            },
+            friends: {
+                type: 'array',
+                items: {
+                    type: 'string'
+                }
             }
         }
     }
@@ -372,7 +378,8 @@ describe('seed.load: configuration', () => {
             address: {
                 country: 'country.foo',
                 city: 'city.bar'
-            }
+            },
+            friends: ['foo', 'bar']
         }
         let actualResult = seed.load(options)
 
