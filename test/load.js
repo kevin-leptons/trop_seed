@@ -3,29 +3,51 @@
 'use strict'
 
 const assert = require('assert')
+const os = require('os')
+const path = require('path')
+const mockFs = require('mock-fs')
 const seed = require('../lib')
 const {getDataFile} = require('./_lib')
 
 describe('seed.load: input', () => {
-    it('invalid filePath, throws error', () => {
-        let filePath = {}
+    it('invalid option identity, throws error', () => {
+        let options = {
+            identity: '!@#$'
+        }
 
         assert.throws(
-            () => seed.load(filePath),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
-                message: 'invalid file path',
+                message: 'invalid option: identity'
+            }
+        )
+    })
+
+    it('invalid option filePath, throws error', () => {
+        let options = {
+            identity: 'foo',
+            filePath: {}
+        }
+
+        assert.throws(
+            () => seed.load(options),
+            {
+                name: 'LoadingError',
+                message: 'invalid option: filePath',
                 labels: {}
             }
         )
     })
 
     it('schema is not an object, throws error', () => {
-        let filePath = 'no_need_file_path_yet'
-        let schema = '{}'
+        let options = {
+            identity: 'foo',
+            schema: '{}'
+        }
 
         assert.throws(
-            () => seed.load(filePath, {schema}),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'invalid option: schema',
@@ -35,13 +57,16 @@ describe('seed.load: input', () => {
     })
 
     it('schema has unknown keyword, throws error', () => {
-        let filePath = getDataFile('valid.json')
-        let schema = {
-            unknownKeyword: 'one'
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('valid.json'),
+            schema: {
+                unknownKeyword: 'one'
+            }
         }
 
         assert.throws(
-            () => seed.load(filePath, {schema}),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'bad schema',
@@ -53,7 +78,6 @@ describe('seed.load: input', () => {
     })
 
     it('schema refers to not existed definition, throws error', () => {
-        let filePath = getDataFile('valid.json')
         let schema = {
             type: 'object',
             properties: {
@@ -62,9 +86,14 @@ describe('seed.load: input', () => {
                 }
             }
         }
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('valid.json'),
+            schema: schema
+        }
 
         assert.throws(
-            () => seed.load(filePath, {schema}),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'bad schema',
@@ -78,13 +107,13 @@ describe('seed.load: input', () => {
     })
 
     it('invalid filePermission, throws error', () => {
-        let filePath = 'no_need_file_path_yet'
         let options = {
+            identity: 'foo',
             filePermission: 0o10000
         }
 
         assert.throws(
-            () => seed.load(filePath, options),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'invalid option: filePermission',
@@ -94,13 +123,13 @@ describe('seed.load: input', () => {
     })
 
     it('invalid defaultValues, throws error', () => {
-        let filePath = 'no_need_file_path_yet'
         let options = {
+            identity: 'foo',
             defaultValues: '{}'
         }
 
         assert.throws(
-            () => seed.load(filePath, options),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'invalid option: defaultValues',
@@ -110,13 +139,12 @@ describe('seed.load: input', () => {
     })
 
     it('has unknown option, throws error', () => {
-        let filePath = 'no_need_file_path_yet'
         let options = {
             foo: 'one'
         }
 
         assert.throws(
-            () => seed.load(filePath, options),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'unknown option: foo',
@@ -128,11 +156,14 @@ describe('seed.load: input', () => {
 
 describe('seed.load: file', () => {
     it('not existed, throws error', () => {
-        let filePath = getDataFile('not_existed_file.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('not_existed_file.json')
+        }
 
         assert.throws(
             () => {
-                seed.load(filePath)
+                seed.load(options)
             },
             {
                 name: 'LoadingError',
@@ -143,10 +174,13 @@ describe('seed.load: file', () => {
     })
 
     it('invalid JSON format, throws error', () => {
-        let filePath = getDataFile('invalid_json_format.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('invalid_json_format.json')
+        }
 
         assert.throws(
-            () => seed.load(filePath),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'invalid JSON format',
@@ -159,10 +193,13 @@ describe('seed.load: file', () => {
     })
 
     it('empty, throws error', () => {
-        let filePath = getDataFile('empty.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('empty.json')
+        }
 
         assert.throws(
-            () => seed.load(filePath),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'invalid JSON format'
@@ -171,21 +208,27 @@ describe('seed.load: file', () => {
     })
 
     it('has comments, should be fine', () => {
-        let filePath = getDataFile('has_comment.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('has_comment.json')
+        }
         let expectedResult = {
             name: 'name.foo',
             age: 18
         }
-        let actualResult = seed.load(filePath)
+        let actualResult = seed.load(options)
 
         assert.deepStrictEqual(actualResult, expectedResult)
     })
 
     it('not a regular file, throws error', () => {
-        let filePath = getDataFile('')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('')
+        }
 
         assert.throws(
-            () => seed.load(filePath),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'not a regular file',
@@ -195,13 +238,14 @@ describe('seed.load: file', () => {
     })
 
     it('invalid file permission, throws error', () => {
-        let filePath = getDataFile('permission_701.json')
-        let option = {
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('permission_701.json'),
             filePermission: 0o700
         }
 
         assert.throws(
-            () => seed.load(filePath, option),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'file permission is too open',
@@ -242,11 +286,15 @@ describe('seed.load: configuration', () => {
     }
 
     it('invalid attribute types, throws error', () => {
-        let filePath = getDataFile('invalid_type.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('invalid_type.json'),
+            schema: SAMPLE_SCHEMA
+        }
 
         assert.throws(
             () => {
-                seed.load(filePath, {schema: SAMPLE_SCHEMA})
+                seed.load(options)
             },
             {
                 name: 'LoadingError',
@@ -265,10 +313,14 @@ describe('seed.load: configuration', () => {
     })
 
     it('missing required attributes, throws error', () => {
-        let filePath = getDataFile('missing_attribute.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('missing_attribute.json'),
+            schema: SAMPLE_SCHEMA
+        }
 
         assert.throws(
-            () => seed.load(filePath, {schema: SAMPLE_SCHEMA}),
+            () => seed.load(options),
             {
                 name: 'LoadingError',
                 message: 'bad attribute',
@@ -286,10 +338,14 @@ describe('seed.load: configuration', () => {
     })
 
     it('missing not required attributes, return default values', () => {
-        let filePath = getDataFile('optional_attribute.json')
-        const defaultValues = {
-            'address.country': 'country.foo',
-            'address.city': 'city.bar'
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('optional_attribute.json'),
+            schema: SAMPLE_SCHEMA,
+            defaultValues: {
+                'address.country': 'country.foo',
+                'address.city': 'city.bar'
+            }
         }
         let expectedResult = {
             name: 'foo',
@@ -299,17 +355,17 @@ describe('seed.load: configuration', () => {
                 city: 'city.bar'
             }
         }
-        let options = {
-            schema: SAMPLE_SCHEMA,
-            defaultValues: defaultValues
-        }
-        let actualResult = seed.load(filePath, options)
+        let actualResult = seed.load(options)
 
         assert.deepStrictEqual(actualResult, expectedResult)
     })
 
     it('return valid configuration', () => {
-        let filePath = getDataFile('valid.json')
+        let options = {
+            identity: 'foo',
+            filePath: getDataFile('valid.json'),
+            schema: SAMPLE_SCHEMA
+        }
         let expectedResult = {
             name: 'name.foo',
             age: 18,
@@ -318,7 +374,100 @@ describe('seed.load: configuration', () => {
                 city: 'city.bar'
             }
         }
-        let actualResult = seed.load(filePath, {schema: SAMPLE_SCHEMA})
+        let actualResult = seed.load(options)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+})
+
+describe('seed.load from current working directory', () => {
+    before(() => {
+        let cwdFilePath = 'config.json'
+        let userFilePath = path.join(os.homedir(), '.config/foo/config.json')
+        let systemFilePath = '/etc/foo/config.json'
+
+        mockFs({
+            [cwdFilePath]: mockFs.file({
+                mode: 0o600,
+                content: '{"foo": "bar"}'
+            }),
+            [userFilePath]: mockFs.file({
+                content: '{}'
+            }),
+            [systemFilePath]: mockFs.file({
+                content: '{}'
+            })
+        })
+    })
+
+    after(() => mockFs.restore())
+
+    it('successfully', () => {
+        let options = {
+            identity: 'foo'
+        }
+        let expectedResult = {
+            foo: 'bar'
+        }
+        let actualResult = seed.load(options)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+})
+
+describe('seed.load from home configuration file', () => {
+    before(() => {
+        let userFilePath = path.join(os.homedir(), '.config/foo/config.json')
+        let systemFilePath = '/etc/foo/config.json'
+
+        mockFs({
+            [userFilePath]: mockFs.file({
+                mode: 0o600,
+                content: '{"foo": "bar"}'
+            }),
+            [systemFilePath]: mockFs.file({
+                content: '{}'
+            })
+        })
+    })
+
+    after(() => mockFs.restore())
+
+    it('successfully', () => {
+        let options = {
+            identity: 'foo'
+        }
+        let expectedResult = {
+            foo: 'bar'
+        }
+        let actualResult = seed.load(options)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+})
+
+describe('seed.load from system configuration file', () => {
+    before(() => {
+        let systemFilePath = '/etc/foo/config.json'
+
+        mockFs({
+            [systemFilePath]: mockFs.file({
+                mode: 0o600,
+                content: '{"foo": "bar"}'
+            })
+        })
+    })
+
+    after(() => mockFs.restore())
+
+    it('successfully', () => {
+        let options = {
+            identity: 'foo'
+        }
+        let expectedResult = {
+            foo: 'bar'
+        }
+        let actualResult = seed.load(options)
 
         assert.deepStrictEqual(actualResult, expectedResult)
     })

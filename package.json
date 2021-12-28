@@ -1,6 +1,6 @@
 {
   "name": "@trop/seed",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Define, load and validate configuration files",
   "main": "lib/index.js",
   "scripts": {
@@ -28,12 +28,14 @@
   "homepage": "https://github.com/kevin-leptons/trop_seed#readme",
   "devDependencies": {
     "@trop/standard": "^0.8.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "mock-fs": "^5.1.2"
   },
   "dependencies": {
     "ajv": "^8.8.2",
     "ajv-formats": "^2.1.1",
     "comment-json": "^4.1.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "untildify": "^4.0.0"
   }
 }

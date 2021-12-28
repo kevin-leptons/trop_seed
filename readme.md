@@ -10,7 +10,7 @@
 npm install @trop/seed
 ```
 
-# APIs
+# API References
 
 ```js
 const {load, LoadingError} = require('@trop/seed')
@@ -18,33 +18,45 @@ const {load, LoadingError} = require('@trop/seed')
 /**
  * Load and validate configuration file.
  *
- * @param {string} filePath - Path to JSON configuration file.
  * @param {Options} [options={}] - Options for loading.
  * @returns {any} Valid configuration from file.
  * @throws {LoadingError}
  */
-function load(schema, file, default_values={}) {}
+function load(options={}) {}
 
 /**
- * @typedef {object} Options
- * @property {object} [schema={}] - JSON schema that specifies configuration.
- * @property {object} [defaultValues={}] - Key-value pairs for default values,
- * it is the same as argument `path` from `lodash.set()`.
- * @param {FilePermission} [filePermission=0o0600] - If file permission is
- * greater than this one then throws error. Works on Linux and MacOS, ignored
- * on on other platforms
+ * Pattern: `/^[a-zA-Z0-9]+$/`.
+ *
+ * @typedef {string} ConfigurationIdentity
  */
 
 /**
- * @typdef {number} FilePermission
+ * @typedef {number} FilePermission
  *
  * Unsigned integer, less than or equal 0o7777.
  */
 
 /**
+ * @typedef {object} Options
+ * @property {ConfigurationIdentity} identity - Identity of configuration.
+ * It is use for detecting path to configuration file. There are files to
+ * load by order:
+ * * ./config.json
+ * * ~/config/{identity}/config.json
+ * * /etc/{identity}/config.json
+ * @property {string} [filePath=undefined] - Override path to configuration
+ * file, ignore attribute `identity`.
+ * @property {object} [schema={}] - JSON schema that specifies configuration.
+ * @property {object} [defaultValues={}] - Key-value pairs for default values,
+ * it is the same as argument `path` from `lodash.set()`.
+ * @property {FilePermission} [filePermission=0o0600] - If file permission is
+ * greater than this one then throws error.
+ */
+
+/**
  * @typedef {Error} LoadingError
  * @property {string} message - Short description.
- * @property {any} filePath - Path to configuration file.
+ * @property {string | undefined} filePath - Path to configuration file.
  * @property {object} labels - Additional information.
  */
 ```
@@ -86,7 +98,9 @@ let defaultValues = {
     'address.country': 'country.foo',
     'address.city': 'country.bar'
 }
-let config = seed.load('config_file.json', {
+let config = seed.load({
+    identity: 'foo',
+    filePath: 'config_file.json',
     schema: schema,
     defaultValues: defaultValues,
     filePermission: 0o700
