@@ -1,11 +1,11 @@
 {
   "name": "@trop/seed",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Define, load and validate configuration files",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha",
-    "standardize": "trop_standard lib test"
+    "standardize": "palmito -i '**/tmp/**' -i '**/*.tgz'"
   },
   "repository": {
     "type": "git",
@@ -27,9 +27,9 @@
   },
   "homepage": "https://github.com/kevin-leptons/trop_seed#readme",
   "devDependencies": {
-    "@trop/standard": "^0.8.0",
     "mocha": "^6.2.0",
-    "mock-fs": "^5.1.2"
+    "mock-fs": "^5.1.2",
+    "palmito": "^0.4.0"
   },
   "dependencies": {
     "ajv": "^8.8.2",

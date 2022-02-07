@@ -1,16 +1,29 @@
 'use strict'
 
 const path = require('path')
+const fs = require('fs')
 
 /**
+ * Retrive absolute path from relative path at directory `../_data`.
  *
- * @param {string} relativePath - Relative from directory `./_data`.
- * @returns {string} - Absolute path to file.
+ * @param {string} relativePath
+ * @return {string}
  */
-function getDataFile(relativePath) {
+function getDataFilePath(relativePath) {
     return path.join(__dirname, '..', '_data', relativePath)
 }
 
+/**
+ *
+ * @param {string} relativePath
+ * @return {string}
+ */
+function readDataFile(relativePath) {
+    let realPath = getDataFilePath(relativePath)
+    return fs.readFileSync(realPath, 'utf-8')
+}
+
 module.exports = {
-    getDataFile
+    getDataFilePath,
+    readDataFile
 }
